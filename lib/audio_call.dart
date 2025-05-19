@@ -91,6 +91,8 @@ class _AudioCallState extends State<AudioCall> {
     agoraEngine = createAgoraRtcEngine();
     await agoraEngine.initialize(const RtcEngineContext(appId: Config.appId));
 
+    await agoraEngine.enableAudio();
+
     // Register the event handler
     agoraEngine.registerEventHandler(
       RtcEngineEventHandler(
@@ -102,11 +104,17 @@ class _AudioCallState extends State<AudioCall> {
             _isJoined = true;
           });
         },
-        onUserJoined: (RtcConnection connection, int remoteUid, int elapsed) {
+        onUserJoined: (
+          RtcConnection connection,
+          int remoteUid,
+          int elapsed,
+        ) async {
           showMessage("Remote user uid:$remoteUid joined the channel");
           setState(() {
             _remoteUid = remoteUid;
           });
+          await agoraEngine.adjustPlaybackSignalVolume(400);
+          await agoraEngine.adjustRecordingSignalVolume(400);
         },
         onUserOffline: (
           RtcConnection connection,
